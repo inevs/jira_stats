@@ -1,5 +1,7 @@
 import typer
 
+from jira_stats.jira_importer import Importer
+
 app = typer.Typer()
 
 
@@ -9,8 +11,15 @@ def load(
         append: bool = typer.Option(False, "--append", "-a")
 ):
     """load data from jira export"""
+    viewer = Importer()
+    fileImport = viewer.load_data(file)
+    if fileImport.error:
+        typer.secho(f"error loading file {str}", fg=typer.colors.RED)
+        typer.Exit(1)
+
+    typer.echo(f"Imported {len(fileImport.issues)} issues")
     # issues = loadFile(str)
-    # save issues in file
+    # save issues in database
     # print how may issues are imported
     if append:
         print(f"Appending data from {file}")
