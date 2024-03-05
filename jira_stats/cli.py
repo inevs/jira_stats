@@ -18,6 +18,7 @@ def load(
         typer.Exit(1)
 
     typer.echo(f"Imported {len(fileImport.issues)} issues")
+
     # issues = loadFile(str)
     # save issues in database
     # print how may issues are imported
