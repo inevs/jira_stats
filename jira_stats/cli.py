@@ -1,5 +1,9 @@
+from pathlib import Path
+
 import typer
 
+from jira_stats import ERRORS
+from jira_stats.database import DatabaseHandler, DEFAULT_DB_FILE_PATH
 from jira_stats.jira_importer import Importer
 
 app = typer.Typer()
@@ -19,8 +23,13 @@ def load(
 
     typer.echo(f"Imported {len(fileImport.issues)} issues")
 
-    # issues = loadFile(str)
     # save issues in database
+    database = DatabaseHandler(Path(DEFAULT_DB_FILE_PATH))
+    result = database.write_issues(fileImport.issues)
+    if result.error:
+        typer.secho(f"Error writing to database {ERRORS[result.error]}")
+        typer.Exit(1)
+
     # print how may issues are imported
     if append:
         print(f"Appending data from {file}")
