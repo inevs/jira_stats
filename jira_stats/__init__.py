@@ -7,11 +7,13 @@ __version__ = "0.1.0"
     READ_ERROR,
     JSON_ERROR,
     DB_WRITE_ERROR,
-) = range(4)
+    DB_READ_ERROR,
+) = range(5)
 
 
 ERRORS = {
     READ_ERROR: "file read error",
     JSON_ERROR: "json related error",
-    DB_WRITE_ERROR: "error writing to database"
+    DB_WRITE_ERROR: "error writing to database",
+    DB_READ_ERROR: "error reading from database"
 }

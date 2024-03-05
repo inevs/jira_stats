@@ -4,24 +4,33 @@ from typing import Any, Dict, List, NamedTuple
 from jira_stats import SUCCESS, JSON_ERROR, READ_ERROR
 
 
-class IssueStateTransition(NamedTuple):
-    timestamp: str
-    from_state: str
-    to_state: str
+class IssueStateTransition:
+    def __init__(self, timestamp: str, from_state: str, to_state: str):
+        self.to_state = to_state
+        self.from_state = from_state
+        self.timestamp = timestamp
 
+class JiraIssue:
+    def __init__(self, key: str, type: str, created: str, resolved: str, status: str, transitions: [IssueStateTransition]):
+        self.key = key
+        self.type = type
+        self.created = created
+        self.resolved = resolved
+        self.status = status
+        self.transitions = transitions
 
-class JiraIssue(NamedTuple):
-    key: str
-    type: str
-    created: str
-    resolved: str
-    status: str
-    transitions: List[IssueStateTransition]
+    def __eq__(self, other):
+        if not isinstance(other, JiraIssue):
+            return NotImplemented
+        return self.key == other.key
 
+    def __hash__(self):
+        return hash(self.key)
 
-class ImportData(NamedTuple):
-    issues: List[JiraIssue]
-    error: int
+class ImportData:
+    def __init__(self, issues: List[JiraIssue], error: int):
+        self.error = error
+        self.issues = issues
 
 
 class Importer:
