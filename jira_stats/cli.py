@@ -4,8 +4,10 @@ from typing import List
 import typer
 
 from jira_stats import ERRORS
+from jira_stats.analyser import Analyser
 from jira_stats.database import DatabaseHandler, DEFAULT_DB_FILE_PATH
 from jira_stats.jira_importer import Importer, JiraIssue
+
 
 app = typer.Typer()
 
@@ -16,6 +18,10 @@ def make_unique(combined_issues) -> List:
         if issue not in unique_issues:
             unique_issues.append(issue)
     return unique_issues
+
+
+def get_database():
+    return DatabaseHandler(Path(DEFAULT_DB_FILE_PATH))
 
 
 @app.command()
@@ -33,7 +39,7 @@ def load(
     typer.echo(f"Imported {len(fileImport.issues)} issues")
 
     # save issues in database
-    database = DatabaseHandler(Path(DEFAULT_DB_FILE_PATH))
+    database = get_database()
 
     if append:
         read = database.read_issues()
@@ -62,13 +68,13 @@ def clean(force: bool = typer.Option(False, "--force", "-f", prompt="Are you sur
 @app.command()
 def stats():
     """show some statistics in the data"""
-    issues = [JiraIssue(key="1235", type="Bug", status="Done", created="", resolved="", transitions=[])]
-    issue2 = JiraIssue(key="1235", type="Story", status="Done", created="", resolved="", transitions=[])
+    data = get_database().read_issues()
+    if data.error:
+        typer.secho(f"Error reading database: {ERRORS[data.error]}")
 
-    if issue2 not in issues:
-        typer.secho(f"issue2 not in issues", fg=typer.colors.GREEN)
-    else:
-        typer.secho(f"issue2 in issues", fg=typer.colors.RED)
+    analyser = Analyser(issues=data.issues)
+    stats = analyser.get_basic_stats()
+    typer.echo(f"{stats.issue_count} issues")
 
 @app.command()
 def version():
