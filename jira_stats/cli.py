@@ -30,8 +30,8 @@ def load(
         append: bool = typer.Option(False, "--append", "-a")
 ):
     """load data from jira export"""
-    viewer = Importer()
-    fileImport = viewer.load_data(file)
+    importer = Importer()
+    fileImport = importer.load_data(file)
     if fileImport.error:
         typer.secho(f"error loading file {str}", fg=typer.colors.RED)
         typer.Exit(1)
@@ -76,6 +76,8 @@ def stats():
     stats = analyser.get_basic_stats()
     typer.echo(f"{stats.issue_count} issues")
 
+
 @app.command()
-def version():
-    pass
+def config():
+    importer = Importer()
+    importer.foo()

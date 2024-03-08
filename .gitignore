@@ -1,5 +1,5 @@
 **/__pycache__
 .venv
 issue.json
-config.ini
+config.yaml
 .idea

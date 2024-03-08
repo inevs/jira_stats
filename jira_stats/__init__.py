@@ -17,3 +17,17 @@ ERRORS = {
     DB_WRITE_ERROR: "error writing to database",
     DB_READ_ERROR: "error reading from database"
 }
+
+(
+    OPEN,
+    PROGRESS,
+    DONE,
+    UNDEFINED
+) = range(4)
+
+T_TYPES = {
+    OPEN: "open",
+    PROGRESS: "in progress",
+    DONE: "done",
+    UNDEFINED: "not defined"
+}

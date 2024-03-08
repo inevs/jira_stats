@@ -1,0 +1,12 @@
+# add your issue states and map them to this three categories
+# save the file as config.yaml
+
+open:
+ YOUR OPEN STATES HERE
+
+in progress:
+ YOUR IN PREOGRESS STATES HERE
+
+done:
+ YOUR DONE STATES HERE
+
