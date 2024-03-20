@@ -1,5 +1,6 @@
 import json
 import yaml
+import re
 from typing import Any, Dict, List
 
 from jira_stats import SUCCESS, JSON_ERROR, READ_ERROR, T_TYPES, UNDEFINED
@@ -13,11 +14,24 @@ class IssueStateTransition:
         self.timestamp = timestamp
 
 
+class IssueBlockedComment:
+
+    def __init__(self, reason: str, created_date: str, is_unblocker: bool = False):
+        self.reason = reason
+        self.created_date = created_date
+        self.is_unblocker = is_unblocker
+
+
 class JiraIssue:
-    def __init__(self, key: str, type: str, created: str, resolved: str, status: str,
-                 transitions: [IssueStateTransition]):
+    def __init__(self, key: str, issue_type: str, created: str, resolved: str, status: str,
+                 transitions=None, blockers=None):
+        if blockers is None:
+            blockers = []
+        if transitions is None:
+            transitions = []
+        self.blockers = blockers
         self.key = key
-        self.type = type
+        self.issue_type = issue_type
         self.created = created
         self.resolved = resolved
         self.status = status
@@ -32,7 +46,7 @@ class ImportData:
 
 class Importer:
 
-    def __init__(self, config = Dict):
+    def __init__(self, config=Dict):
         try:
             with open('config.yaml') as f:
                 self._config = yaml.load(f, Loader=yaml.FullLoader)
@@ -62,6 +76,34 @@ class Importer:
         return T_TYPES[UNDEFINED]
 
     def convert_issue(self, issue: Dict[str, Any]) -> JiraIssue:
+        transitions = self.get_transitions(issue)
+        blocker_comments = self.get_blockers(issue)
+        return JiraIssue(
+            key=issue["key"],
+            issue_type=issue["fields"]["issuetype"]["name"],
+            created=issue["fields"]["created"],
+            resolved=issue["fields"]["resolutiondate"],
+            status=issue["fields"]["status"]["name"],
+            transitions=transitions,
+            blockers=blocker_comments
+        )
+
+    def get_blockers(self, issue):
+        blocker_comments = []
+        comments = issue["fields"]["comment"]["comments"]
+        for comment in comments:
+            body: str = comment["body"]
+            if body.startswith("(flag)"):
+                reason = ''.join(body.splitlines()[2:])
+                blocker_comment = IssueBlockedComment(reason=reason, created_date=comment["created"])
+                blocker_comments.append(blocker_comment)
+            if body.startswith("(flagoff)"):
+                reason = ''.join(body.splitlines()[2:])
+                blocker_comment = IssueBlockedComment(reason=reason, created_date=comment["created"], is_unblocker=True)
+                blocker_comments.append(blocker_comment)
+        return blocker_comments
+
+    def get_transitions(self, issue):
         transitions = []
         changelog_histories = issue["changelog"]["histories"]
         for changelog_history in changelog_histories:
@@ -70,18 +112,10 @@ class Importer:
             if len(status_changes) > 0:
                 for status_change in status_changes:
                     transitions.append(self.convert_transition(created, status_change))
-        return JiraIssue(
-            key=issue["key"],
-            type=issue["fields"]["issuetype"]["name"],
-            created=issue["fields"]["created"],
-            resolved=issue["fields"]["resolutiondate"],
-            status=issue["fields"]["status"]["name"],
-            transitions=transitions
-        )
+        return transitions
 
     def convert_transition(self, created, status_change):
         transition = IssueStateTransition(timestamp=created, from_state=status_change["fromString"],
                                           to_state=status_change["toString"],
                                           transition_type=self.get_transition_type_for(status_change))
         return transition
-

@@ -20,7 +20,7 @@ class DatabaseHandler:
         self._db_path = db_path
 
     def write_issues(self, issues: List[JiraIssue]) -> DBResponse:
-        print("writing issues to database " + str(self._db_path))
+        # print("writing issues to database " + str(self._db_path))
         try:
             with self._db_path.open("w") as db:
                 json.dump(issues, db, indent=4, default=vars)
@@ -29,7 +29,7 @@ class DatabaseHandler:
             return DBResponse(issues, DB_WRITE_ERROR)
 
     def read_issues(self) -> DBResponse:
-        print("reading issues from database " + str(self._db_path))
+        # print("reading issues from database " + str(self._db_path))
         try:
             with self._db_path.open("r") as db:
                 try:

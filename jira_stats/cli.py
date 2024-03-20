@@ -59,6 +59,7 @@ def clean(force: bool = typer.Option(False, "--force", "-f", prompt="Are you sur
     if not force:
         return
 
+    typer.echo(f"cleaning database in {get_database()._db_path}")
     database = DatabaseHandler(Path(DEFAULT_DB_FILE_PATH))
     result = database.write_issues([])
     if result.error:
@@ -76,6 +77,18 @@ def stats():
     stats = analyser.get_basic_stats()
     typer.echo(f"{stats.issue_count} issues")
 
+
+@app.command()
+def blocks():
+    data = get_database().read_issues()
+    if data.error:
+        typer.secho(f"Error reading database: {ERRORS[data.error]}")
+    issues = data.issues
+    for issue in issues:
+        blockers = issue["blockers"]
+        for blocker in blockers:
+            reason = blocker["reason"]
+            typer.echo(reason)
 
 @app.command()
 def config():
