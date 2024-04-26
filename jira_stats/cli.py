@@ -6,7 +6,7 @@ import typer
 from jira_stats import ERRORS
 from jira_stats.analyser import Analyser
 from jira_stats.database import DatabaseHandler, DEFAULT_DB_FILE_PATH
-from jira_stats.jira_importer import Importer, JiraIssue
+from jira_stats.jira_importer import Importer
 
 
 app = typer.Typer()
@@ -93,4 +93,4 @@ def blocks():
 @app.command()
 def config():
     importer = Importer()
-    importer.foo()
+    importer.foo()  # type: ignore

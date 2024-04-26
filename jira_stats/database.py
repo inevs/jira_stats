@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import List, Dict, Any, NamedTuple
+from typing import List, NamedTuple
 
 from jira_stats import SUCCESS, DB_WRITE_ERROR, JSON_ERROR, DB_READ_ERROR
 from jira_stats.jira_importer import JiraIssue

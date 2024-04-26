@@ -1,0 +1,130 @@
+[build-system]
+requires = ["setuptools>=61.2", "tox"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jira_stats"
+version = "0.1.0"
+authors = [{name = "Sven Günther"}]
+requires-python = ">=3.8"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/inevs/jira_stats"
+
+[project.scripts]
+jira_stats="jira_stats.__main__:main"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.packages]
+find = {namespaces = false}
+
+[tool.tox]
+legacy_tox_ini = """
+    [tox]
+    envlist = py3{9,10,11,12},coverage,ruff,mypy
+    usedevelop = true
+
+    [gh-actions]
+    python =
+        3.9: py39
+        3.10: py310
+        3.11: py311
+        3.12: py312
+
+   [testenv:py3{9,10,11,12}]
+    deps =
+        pytest
+    commands =
+        pytest {posargs:tests}
+
+    [testenv:coverage]
+    deps =
+        pytest
+        coverage
+    commands =
+        coverage erase
+        coverage run -m pytest {posargs:tests}
+        coverage report
+        coverage xml
+        coverage html
+
+    [testenv:ruff]
+    deps =
+        ruff
+    commands = ruff check {posargs:jira_stats tests}
+
+    [testenv:mypy]
+    deps =
+        mypy
+        types-PyYAML
+    commands = mypy {posargs}
+"""
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests"
+]
+pythonpath = [
+    "jira_stats",
+    "tests",
+]
+
+[tool.coverage.paths]
+source = [
+    "jira_stats"
+]
+
+[tool.coverage.run]
+omit = [
+    "tests/*",
+]
+
+[tool.ruff]
+exclude = [
+    ".eggs",
+    ".git",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "build",
+    "dist",
+    "venv",
+]
+line-length = 120
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["C40", "E", "F", "SIM", "TCH"]
+ignore = []
+fixable = ["A", "B", "C", "D", "E", "F"]
+unfixable = []
+per-file-ignores = {}
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+mccabe.max-complexity = 10
+
+[tool.mypy]
+packages = ["jira_stats","tests"]
+check_untyped_defs = true
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes = true
+strict_equality = true
+warn_redundant_casts = true
+warn_unused_configs = true
+no_implicit_reexport = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
