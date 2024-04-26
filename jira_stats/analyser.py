@@ -16,7 +16,7 @@ class Analyser:
 
 
     def get_basic_stats(self) -> BasicStats:
-        issue_count = self.pd_issues.count("rows")
+        _issue_count = self.pd_issues.count("rows")
         print(self.pd_issues["status"].value_counts())
 
         return BasicStats(issue_count=0)

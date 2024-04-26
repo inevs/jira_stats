@@ -1,6 +1,5 @@
 import json
 import yaml
-import re
 from typing import Any, Dict, List
 
 from jira_stats import SUCCESS, JSON_ERROR, READ_ERROR, T_TYPES, UNDEFINED
@@ -68,7 +67,7 @@ class Importer:
     def get_transition_type_for(self, status_change) -> str:
         to_state = status_change["toString"]
         for t in T_TYPES:
-            if t == T_TYPES[UNDEFINED]:
+            if t == UNDEFINED:
                 continue
             transition_states = self._config[T_TYPES[t]]
             if transition_states.count(to_state) > 0:
